@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #080808;
+  --color-surface: #111111;
+  --color-card: #181818;
+  --color-border-main: #252525;
+  --color-border-sub: #2e2e2e;
+  --color-apex-accent: #c8ff00;
+  --color-apex-danger: #ff4545;
+  --color-apex-info: #00d4ff;
+  --color-apex-gold: #ffd700;
+  --color-apex-text: #f0f0f0;
+  --color-apex-muted: #888888;
+  --color-apex-dim: #555555;
+
+  --font-display: var(--font-bebas-neue);
+  --font-body: var(--font-dm-sans);
+  --font-mono: var(--font-jetbrains-mono);
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  --animate-fade-up: fade-up 0.8s ease forwards;
+
+  @keyframes tick {
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  --animate-tick: tick 25s linear infinite;
+}
+
+:root {
+  --background: var(--color-bg);
+  --foreground: var(--color-apex-text);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
