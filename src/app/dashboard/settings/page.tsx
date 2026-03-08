@@ -21,6 +21,7 @@ export default function SettingsPage() {
     const [weight, setWeight] = useState('70')
     const [activityLevel, setActivityLevel] = useState('Moderate')
     const [dietType, setDietType] = useState('Non-Veg')
+    const [budget, setBudget] = useState('Medium')
     const [isSaving, setIsSaving] = useState(false)
 
     useEffect(() => {
@@ -37,6 +38,7 @@ export default function SettingsPage() {
                 setWeight(data.weight || '70')
                 setActivityLevel(data.activityLevel || 'Moderate')
                 setDietType(data.dietType || 'Non-Veg')
+                setBudget(data.budget || 'Medium')
             } catch (e) {
                 console.error("Failed to parse profile", e)
             }
@@ -47,7 +49,7 @@ export default function SettingsPage() {
         setIsSaving(true)
         const profile = {
             name, level, equipment, goal,
-            age, height, weight, activityLevel, dietType
+            age, height, weight, activityLevel, dietType, budget
         }
         localStorage.setItem('apex_athlete_profile', JSON.stringify(profile))
 
@@ -216,6 +218,18 @@ export default function SettingsPage() {
                                 >
                                     <option>Veg</option>
                                     <option>Non-Veg</option>
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-[0.65rem] font-mono text-apex-muted uppercase tracking-[2px]">FOOD BUDGET</label>
+                                <select
+                                    value={budget}
+                                    onChange={(e) => setBudget(e.target.value)}
+                                    className="w-full bg-surface border border-border-main p-3 text-[0.9rem] text-apex-text outline-none focus:border-apex-accent appearance-none"
+                                >
+                                    <option>Low</option>
+                                    <option>Medium</option>
+                                    <option>High</option>
                                 </select>
                             </div>
                         </div>

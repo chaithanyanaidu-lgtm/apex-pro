@@ -19,8 +19,25 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "APEX — Train. Eat. Dominate.",
-  description: "Science-backed workout plans & precision nutrition. Built for serious athletes.",
+  title: "APEX PRO — Train. Eat. Dominate.",
+  description: "AI-powered fitness & nutrition tracker. Built for serious athletes.",
+  manifest: "/manifest.json",
+  themeColor: "#c8ff00",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "APEX PRO",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
+  icons: {
+    icon: "/icons/icon-512.png",
+    apple: "/icons/icon-192.png",
+  },
 };
 
 export default function RootLayout({
@@ -34,6 +51,17 @@ export default function RootLayout({
         className={`${bebasNeue.variable} ${dmSans.variable} ${jetbrainsMono.variable} antialiased`}
       >
         {children}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                  navigator.serviceWorker.register('/sw.js').catch(() => {});
+                });
+              }
+            `,
+          }}
+        />
       </body>
     </html>
   );

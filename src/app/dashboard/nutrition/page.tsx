@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { analyzeBody, generateWeeklyDiet, UserData, BodyAnalysis, DietPlan } from '@/lib/diet-engine'
-import { Info, Calendar, Flame, Target, ChevronRight, ChevronLeft, Loader2, Apple, Utensils, Zap, Clock, Lock } from 'lucide-react'
+import { analyzeBody, generateWeeklyDiet, UserData, BodyAnalysis, DietPlan, FOOD_DETAILS, FoodDetail } from '@/lib/diet-engine'
+import { Info, Calendar, Flame, Target, ChevronRight, ChevronLeft, Loader2, Apple, Utensils, Zap, Clock, Coffee, Sun, Moon, Cookie, GlassWater } from 'lucide-react'
 import Link from 'next/link'
+import DietDetailPanel from '@/components/dashboard/DietDetailPanel'
 
 export default function NutritionPage() {
     const [profile, setProfile] = useState<any>(null)
@@ -11,6 +12,7 @@ export default function NutritionPage() {
     const [weekOffset, setWeekOffset] = useState(1)
     const [dietPlan, setDietPlan] = useState<DietPlan | null>(null)
     const [analysis, setAnalysis] = useState<BodyAnalysis | null>(null)
+    const [selectedMeal, setSelectedMeal] = useState<{ label: string; name: string; detail: FoodDetail | null } | null>(null)
 
     useEffect(() => {
         const saved = localStorage.getItem('apex_athlete_profile')
@@ -25,6 +27,7 @@ export default function NutritionPage() {
                     weight: Number(data.weight) || 70,
                     activityLevel: data.activityLevel || 'Moderate',
                     dietType: (data.dietType || 'Non-Veg') as any,
+                    budget: data.budget || 'Medium',
                 }
 
                 const bodyAnalysis = analyzeBody(userData)
@@ -38,6 +41,16 @@ export default function NutritionPage() {
         }
         setLoading(false)
     }, [weekOffset])
+
+    const handleMealClick = (label: string, name: string) => {
+        // Look up food detail — try exact match, then partial
+        let detail = FOOD_DETAILS[name] || null
+        if (!detail) {
+            const key = Object.keys(FOOD_DETAILS).find(k => name.includes(k) || k.includes(name))
+            if (key) detail = FOOD_DETAILS[key]
+        }
+        setSelectedMeal({ label, name, detail })
+    }
 
     if (loading) {
         return (
@@ -54,7 +67,7 @@ export default function NutritionPage() {
                     <Apple className="w-8 h-8 text-apex-accent" />
                 </div>
                 <h2 className="text-2xl font-display mb-3 tracking-wider uppercase">PROFILE DATA MISSING</h2>
-                <p className="text-apex-muted mb-8 max-w-md mx-auto">We need your age, height, and weight to calculate the perfect South Indian diet plan for your goals.</p>
+                <p className="text-apex-muted mb-8 max-w-md mx-auto">We need your age, height, and weight to calculate the perfect diet plan for your goals.</p>
                 <Link
                     href="/dashboard/settings"
                     className="inline-block px-8 py-3 bg-apex-accent text-bg font-bold tracking-[2px] uppercase hover:bg-white transition-colors"
@@ -65,23 +78,47 @@ export default function NutritionPage() {
         )
     }
 
+    const MEAL_ICONS = {
+        emptyStomach: <GlassWater className="w-3 h-3" />,
+        breakfast: <Coffee className="w-3 h-3" />,
+        lunch: <Sun className="w-3 h-3" />,
+        snack: <Cookie className="w-3 h-3" />,
+        dinner: <Moon className="w-3 h-3" />,
+    }
+
+    const MEAL_COLORS: Record<string, string> = {
+        emptyStomach: 'text-cyan-400',
+        breakfast: 'text-amber-400',
+        lunch: 'text-orange-400',
+        snack: 'text-green-400',
+        dinner: 'text-indigo-400',
+    }
+
+    const MEAL_TIMES: Record<string, string> = {
+        emptyStomach: '6:00 AM',
+        breakfast: '7:30 AM',
+        lunch: '1:00 PM',
+        snack: '4:30 PM',
+        dinner: '8:00 PM',
+    }
+
     return (
         <div className="space-y-8 animate-fade-up">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                 <div>
                     <div className="text-[0.65rem] font-mono tracking-[4px] text-apex-accent uppercase mb-2">
-                        ELITE NUTRITION ENGINE
+                        NUTRITION ENGINE
                     </div>
                     <h1 className="font-display text-[2.8rem] tracking-[1px] uppercase leading-none">
-                        WEEKLY <em className="text-apex-accent not-italic">FORGE</em>
+                        DIET & <em className="text-apex-accent not-italic">NUTRITION</em>
                     </h1>
-                    <p className="text-apex-muted text-[0.85rem] mt-2 font-mono">CALIBRATED FOR: {profile.name?.toUpperCase() || 'ATHLETE'}</p>
+                    <p className="text-apex-muted text-[0.85rem] mt-2 font-mono">CALIBRATED FOR: {profile.name?.toUpperCase() || 'ATHLETE'} • BUDGET: {(profile.budget || 'Medium').toUpperCase()}</p>
                 </div>
 
                 <div className="flex items-center gap-1 bg-surface p-1 border border-border-main">
                     <button
                         onClick={() => setWeekOffset(prev => Math.max(1, prev - 1))}
-                        className={`p-2.5 transition-colors ${weekOffset === 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/5 text-apex-accent'}`}
+                        className={`p-2.5 transition-colors cursor-pointer ${weekOffset === 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/5 text-apex-accent'}`}
                         disabled={weekOffset === 1}
                     >
                         <ChevronLeft className="w-5 h-5" />
@@ -91,7 +128,7 @@ export default function NutritionPage() {
                     </div>
                     <button
                         onClick={() => setWeekOffset(prev => prev + 1)}
-                        className="p-2.5 hover:bg-white/5 text-apex-accent transition-colors"
+                        className="p-2.5 hover:bg-white/5 text-apex-accent transition-colors cursor-pointer"
                     >
                         <ChevronRight className="w-5 h-5" />
                     </button>
@@ -128,8 +165,8 @@ export default function NutritionPage() {
                             <Calendar className="w-5 h-5 text-apex-accent" />
                         </div>
                         <div>
-                            <h2 className="font-display text-2xl tracking-[1px] uppercase">SOUTH INDIAN ROTATING PLAN</h2>
-                            <p className="text-[0.7rem] font-mono text-apex-muted uppercase tracking-[1px]">Optimized for Telugu States & Local Ingredients</p>
+                            <h2 className="font-display text-2xl tracking-[1px] uppercase">WEEKLY MEAL PLAN</h2>
+                            <p className="text-[0.7rem] font-mono text-apex-muted uppercase tracking-[1px]">Optimized for Your Goals & Budget</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -137,7 +174,7 @@ export default function NutritionPage() {
                             {profile.dietType?.toUpperCase()} ACTIVE
                         </span>
                         <span className="text-[0.6rem] font-mono p-[4px_12px] bg-apex-accent/10 text-apex-accent border border-apex-accent/20 uppercase tracking-[1px]">
-                            WEEK {weekOffset} UNLOCKED
+                            WEEK {weekOffset}
                         </span>
                     </div>
                 </div>
@@ -150,61 +187,39 @@ export default function NutritionPage() {
                                 <span className="font-display text-4xl text-apex-accent leading-none">{day.day}</span>
                             </div>
 
-                            <div className="p-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 bg-card group-hover:bg-white/[0.01] transition-colors relative">
+                            <div className="p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 bg-card group-hover:bg-white/[0.01] transition-colors">
                                 {[
-                                    { label: 'BREAKFAST', meal: day.breakfast, icon: <Clock className="w-3 h-3" />, time: '08:00 AM' },
-                                    { label: 'LUNCH', meal: day.lunch, icon: <Utensils className="w-3 h-3" />, time: '01:30 PM' },
-                                    { label: 'SNACK', meal: day.snack, icon: <Apple className="w-3 h-3" />, time: '05:00 PM' },
-                                    { label: 'DINNER', meal: day.dinner, icon: <Utensils className="w-3 h-3" />, time: '08:30 PM' },
-                                ].map((m, idx) => (
-                                    <div key={idx} className="space-y-3 relative">
-                                        <div className="flex items-center justify-between border-b border-border-main/30 pb-2">
-                                            <div className="flex items-center gap-2">
-                                                <div className="text-apex-accent">{m.icon}</div>
-                                                <span className="text-[0.6rem] font-mono text-apex-accent tracking-[2px] uppercase font-bold">{m.label}</span>
+                                    { key: 'emptyStomach', label: 'EMPTY STOMACH', meal: day.emptyStomach },
+                                    { key: 'breakfast', label: 'BREAKFAST', meal: day.breakfast },
+                                    { key: 'lunch', label: 'LUNCH', meal: day.lunch },
+                                    { key: 'snack', label: 'SNACK', meal: day.snack },
+                                    { key: 'dinner', label: 'DINNER', meal: day.dinner },
+                                ].map((m) => (
+                                    <button
+                                        key={m.key}
+                                        onClick={() => handleMealClick(m.label, m.meal)}
+                                        className="space-y-2 text-left hover:bg-surface/50 p-3 border border-transparent hover:border-border-main transition-all cursor-pointer rounded-sm"
+                                    >
+                                        <div className="flex items-center justify-between border-b border-border-main/30 pb-1.5">
+                                            <div className="flex items-center gap-1.5">
+                                                <div className={MEAL_COLORS[m.key]}>{MEAL_ICONS[m.key as keyof typeof MEAL_ICONS]}</div>
+                                                <span className="text-[0.55rem] font-mono text-apex-accent tracking-[1.5px] uppercase font-bold">{m.label}</span>
                                             </div>
-                                            <span className="text-[0.55rem] font-mono text-apex-dim">{m.time}</span>
+                                            <span className="text-[0.5rem] font-mono text-apex-dim">{MEAL_TIMES[m.key]}</span>
                                         </div>
-                                        <div className="text-[1rem] leading-relaxed font-semibold text-apex-text min-h-[3rem]">
+                                        <div className="text-[0.85rem] leading-relaxed font-semibold text-apex-text min-h-[2.5rem]">
                                             {m.meal}
                                         </div>
-                                        <div className="flex gap-2">
-                                            <div className="w-2 h-2 rounded-full bg-apex-accent/20" />
-                                            <div className="w-2 h-2 rounded-full bg-apex-accent/20" />
-                                            <div className="w-2 h-2 rounded-full bg-apex-accent/20" />
-                                        </div>
-                                    </div>
+                                        <div className="text-[0.55rem] font-mono text-apex-dim">TAP FOR DETAILS →</div>
+                                    </button>
                                 ))}
-
-                                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <div className="p-2 border border-apex-accent/30 bg-apex-accent/5 cursor-pointer hover:bg-apex-accent/10">
-                                        <ChevronRight className="w-4 h-4 text-apex-accent" />
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     ))}
                 </div>
             </div>
 
-            {/* Weekly Retension Lock Visual */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[weekOffset + 1, weekOffset + 2, weekOffset + 3].map(w => (
-                    <div key={w} className="bg-surface border border-border-main p-6 flex items-center justify-between opacity-50 relative overflow-hidden grayscale">
-                        <div className="flex items-center gap-4">
-                            <Lock className="w-5 h-5 text-apex-dim" />
-                            <div>
-                                <div className="text-[0.6rem] font-mono text-apex-dim uppercase tracking-[1px]">FUTURE PLAN</div>
-                                <div className="font-display text-xl uppercase tracking-[1px]">WEEK {w}</div>
-                            </div>
-                        </div>
-                        <div className="text-[0.55rem] font-mono text-apex-dim text-right max-w-[80px] uppercase">
-                            Unlock on Monday
-                        </div>
-                    </div>
-                ))}
-            </div>
-
+            {/* Disclaimer */}
             <footer className="p-6 bg-apex-accent/5 border border-apex-accent/10 flex items-start gap-4">
                 <div className="p-2 bg-apex-accent/10 border border-apex-accent/20">
                     <Info className="w-5 h-5 text-apex-accent" />
@@ -212,12 +227,21 @@ export default function NutritionPage() {
                 <div>
                     <h4 className="text-[0.8rem] font-bold text-apex-text uppercase tracking-[1px] mb-1">Dietary Disclaimer</h4>
                     <p className="text-[0.75rem] text-apex-muted leading-relaxed">
-                        These plans are dynamically generated by APEX AI based on South Indian staple foods common in Telangana and Andhra Pradesh.
-                        They are designed to meet your macro targets while remaining simple and affordable.
+                        These plans are dynamically generated by the APEX AI engine based on your profile data, fitness goals, and selected budget tier.
                         Always consult with a qualified nutritionist or medical professional for specific health conditions.
                     </p>
                 </div>
             </footer>
+
+            {/* Detail Panel */}
+            {selectedMeal && (
+                <DietDetailPanel
+                    mealLabel={selectedMeal.label}
+                    mealName={selectedMeal.name}
+                    detail={selectedMeal.detail}
+                    onClose={() => setSelectedMeal(null)}
+                />
+            )}
         </div>
     )
 }

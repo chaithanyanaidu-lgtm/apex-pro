@@ -84,3 +84,12 @@ export interface WorkoutProgram {
     week: number;
     sessions: WorkoutSession[];
 }
+
+export interface Badge {
+    id: string;
+    name: string;
+    description: string;
+    icon: 'trophy' | 'medal' | 'star' | 'flame' | 'zap' | 'crown';
+    earned: boolean;
+    earnedDate?: string;
+}
