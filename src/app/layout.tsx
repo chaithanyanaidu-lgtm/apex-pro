@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -18,21 +18,22 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#c8ff00",
+};
+
 export const metadata: Metadata = {
   title: "APEX PRO — Train. Eat. Dominate.",
   description: "AI-powered fitness & nutrition tracker. Built for serious athletes.",
   manifest: "/manifest.json",
-  themeColor: "#c8ff00",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "APEX PRO",
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
   },
   icons: {
     icon: "/icons/icon-512.png",
