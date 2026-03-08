@@ -29,7 +29,9 @@ export default function ProfileDropdown({ userName }: ProfileDropdownProps) {
     }, [isOpen])
 
     const handleLogout = async () => {
-        await supabase.auth.signOut()
+        if (supabase) {
+            try { await supabase.auth.signOut() } catch { /* ignore */ }
+        }
         localStorage.removeItem('apex_athlete_profile')
         router.push('/')
     }

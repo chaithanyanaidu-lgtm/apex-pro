@@ -30,6 +30,7 @@ export default function Sidebar() {
     const [user, setUser] = useState<any>(null)
 
     useEffect(() => {
+        if (!supabase) return
         supabase.auth.getUser().then(({ data }: any) => {
             if (data?.user) {
                 setUser(data.user)
@@ -38,7 +39,9 @@ export default function Sidebar() {
     }, [])
 
     const handleLogout = async () => {
-        await supabase.auth.signOut()
+        if (supabase) {
+            try { await supabase.auth.signOut() } catch { /* ignore */ }
+        }
         router.push('/')
     }
 
